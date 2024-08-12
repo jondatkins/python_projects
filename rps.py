@@ -11,7 +11,7 @@ class RPS(Enum):
 
 print("")
 playerchoice = input("Enter... \n1 for Rock,\n2 for Paper, or \n3 for Scissors:\n\n")
-
+# Should handle non int input here
 player = int(playerchoice)
 
 if player < 1 or player > 3:
