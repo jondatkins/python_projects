@@ -10,12 +10,22 @@ class RPS(Enum):
 
 
 print("")
-playerchoice = input("Enter... \n1 for Rock,\n2 for Paper, or \n3 for Scissors:\n\n")
-# Should handle non int input here
-player = int(playerchoice)
+player = "-1"
+while True:
+    playerchoice = input(
+        "Enter... \n1 for Rock,\n2 for Paper, or \n3 for Scissors:\n\n"
+    )
+    try:
+        player = int(playerchoice)
+    except Exception as ex:
+        print("Please enter a number from 1 to 3.")
+        print(ex)
+        continue
+    if player < 1 or player > 3:
+        print("You must enter 1, 2 or 3.")
+        continue
+    break
 
-if player < 1 or player > 3:
-    sys.exit("You must enter 1, 2 or 3.")
 
 computerchoice = random.choice("123")
 
