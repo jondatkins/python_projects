@@ -12,6 +12,7 @@ while timeLeft > 0:
     print(timeLeft, end=" ", flush=True)
     time.sleep(1)
     timeLeft = timeLeft - 1
+subprocess.run(["dunstify", "foo bar"])
 subprocess.run(["paplay", "mixkit-classic-alarm-995.wav"])
 # Another way of playing a sound using pulse audio
 # file = "mixkit-classic-alarm-995.wav"
