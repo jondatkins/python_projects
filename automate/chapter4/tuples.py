@@ -1,0 +1,8 @@
+eggs = ("hello", 42, 0.5)
+print(eggs[0])
+print(eggs[1:3])
+print(len(eggs))
+print(type(eggs))
+print(type("hello"))
+print(tuple(["cat", "dog", 5]))
+print(list(("cat", "dog", 5)))
