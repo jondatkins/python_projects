@@ -2,6 +2,8 @@
 import random
 import time
 import copy
+import os
+
 
 WIDTH = 60
 HEIGHT = 20
@@ -66,3 +68,4 @@ while True:  # Main program loop.
                 # Everything else dies or stays dead:
                 nextCells[x][y] = " "
     time.sleep(1)  # Add a 1-second pause to reduce flickering.
+    os.system("cls" if os.name == "nt" else "clear")
