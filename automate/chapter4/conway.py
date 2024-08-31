@@ -4,9 +4,9 @@ import time
 import copy
 import os
 
-
-WIDTH = 60
-HEIGHT = 20
+rows, columns = os.popen("stty size", "r").read().split()
+WIDTH = int(columns)
+HEIGHT = int(rows)
 # Create a list of list for the cells:
 nextCells = []
 for x in range(WIDTH):
