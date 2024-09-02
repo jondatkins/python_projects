@@ -39,6 +39,10 @@ cellWidth = WIDTH * germ.__len__()
 try:
     WIDTH = int(args[0])
     HEIGHT = int(args[1])
+    if WIDTH > TERM_WIDTH:
+        WIDTH = TERM_WIDTH
+    if HEIGHT > TERM_HEIGHT:
+        HEIGHT = TERM_HEIGHT
 except IndexError:
     pass
 
@@ -173,7 +177,7 @@ def printCellGenerations():
                     myGerm.germChar = germ
                     myGerm.isAboutToDie = False
                     nextCells[x][y] = myGerm
-                elif currentCells[x][y].germChar == " " and numNeighbors == 3:
+                elif currentCells[x][y].germChar == noGerm and numNeighbors == 3:
                     # Dead cells with 3 neighbors become alive:
                     myGerm = MyGerm()
                     myGerm.isAlive = True
@@ -184,7 +188,7 @@ def printCellGenerations():
                     # Everything else dies or stays dead:
                     myGerm = MyGerm()
                     myGerm.isAlive = False
-                    myGerm.germChar = " "
+                    myGerm.germChar = noGerm
                     myGerm.isAboutToDie = False
                     nextCells[x][y] = myGerm
 
