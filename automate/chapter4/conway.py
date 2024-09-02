@@ -6,14 +6,7 @@ import os
 import sys
 import shutil
 
-
-def print_centre(s):
-    print(s.center(shutil.get_terminal_size().columns))
-
-
-from termcolor import colored, cprint
-
-# from termcolor import cprint
+# from termcolor import colored, cprint
 
 SLEEP_PERIOD = 1
 HEADER = "\033[95m"
@@ -27,13 +20,16 @@ BOLD = "\033[1m"
 UNDERLINE = "\033[4m"
 
 
-class MyClass:
-    """A simple example class"""
+# germ = ""
+germ = "#"
+currentCells = []
 
-    i = 12345
-
-    def f(self):
-        return "hello world"
+# Get the width and height of the terminal
+rows, columns = os.popen("stty size", "r").read().split()
+TERM_WIDTH = int(columns)
+TERM_HEIGHT = int(rows)
+WIDTH = 10
+HEIGHT = 10
 
 
 class MyGerm:
@@ -44,17 +40,6 @@ class MyGerm:
         self.isAlive = True
         self.isAboutToDie = False
         self.germChar = "#"
-
-
-# germ = ""
-germ = "#"
-currentCells = []
-
-rows, columns = os.popen("stty size", "r").read().split()
-# WIDTH = int(columns)
-# HEIGHT = int(rows)
-WIDTH = 10
-HEIGHT = 10
 
 
 def randomCellsGenerator():
@@ -89,15 +74,35 @@ def centerPrint():
         print(" ")
 
 
+def print_centre(s):
+    print(s.center(shutil.get_terminal_size().columns))
+
+
+# Just a test function to see if I can print the grid in the center of the terminal
+def printCellsCenter(currentCells):
+    numSpacesX = TERM_WIDTH // 2 - WIDTH // 2
+    numSpacesY = TERM_HEIGHT // 2 - HEIGHT // 2
+    for x in range(numSpacesY):
+        print()
+    for y in range(HEIGHT):
+        # push the grid right
+        for i in range(numSpacesX):
+            print(" ", end="")
+        for x in range(WIDTH):
+            # print(x, y, end="")
+            # print("x", end="")
+            print(currentCells[x][y].germChar, end="")  # Print the # or space.
+        print()
+
+
 def printCells(currentCells):
     centerPrint()
     cells = ""
     # Print currentCells on the screen:
     for y in range(HEIGHT):
-        print("\n\n")
         for x in range(WIDTH):
-            # print(currentCells[x][y].germChar, end="")  # Print the # or space.
-            cprint(currentCells[x][y].germChar, "red", end="")  # Print the # or space.
+            print(currentCells[x][y].germChar, end="")  # Print the # or space.
+            # cprint(currentCells[x][y].germChar, "red", end="")  # Print the # or space.
             # cells += currentCells[x][y]
         print()  # Print a newline at the end of the row.
         # cells += "\n"
@@ -108,7 +113,7 @@ def clearScreen():
     #     update terminal without flickering, as described at:
     #    https://stackoverflow.com/questions/69870429/how-can-i-update-clear-the-console-without-blinking-in-python
     # print("")
-    termHeightPlusOne = HEIGHT
+    termHeightPlusOne = TERM_HEIGHT
     termHeightPlusOne = str(termHeightPlusOne)
     print("\033[" + termHeightPlusOne + "A\033[2K", end="")
     # os.system("cls" if os.name == "nt" else "clear")
@@ -116,11 +121,12 @@ def clearScreen():
 
 def printCellGenerations():
     while True:  # Main program loop.
-        print("\n\n\n\n\n")  # Separate each step with newlines.
+        # print("\n\n\n\n\n")  # Separate each step with newlines.
         currentCells = copy.deepcopy(nextCells)
 
         # table = printCells(currentCells)
-        printCells(currentCells)
+        # printCells(currentCells)
+        printCellsCenter(currentCells)
 
         # cprint(table, "green")
         # print(table)
@@ -183,3 +189,5 @@ def printCellGenerations():
 
 
 printCellGenerations()
+# print_centre("Hello World")
+# printCellsCenter()
