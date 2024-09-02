@@ -18,18 +18,29 @@ FAIL = "\033[91m"
 ENDC = "\033[0m"
 BOLD = "\033[1m"
 UNDERLINE = "\033[4m"
-
+args = None
+if args is None:
+    args = sys.argv[1:]
 
 # germ = ""
-germ = "#"
+germ = " # "
+noGerm = "   "
 currentCells = []
 
 # Get the width and height of the terminal
 rows, columns = os.popen("stty size", "r").read().split()
 TERM_WIDTH = int(columns)
 TERM_HEIGHT = int(rows)
-WIDTH = 10
-HEIGHT = 10
+WIDTH = 20
+HEIGHT = 20
+
+cellWidth = WIDTH * germ.__len__()
+
+try:
+    WIDTH = int(args[0])
+    HEIGHT = int(args[1])
+except IndexError:
+    pass
 
 
 class MyGerm:
@@ -39,7 +50,8 @@ class MyGerm:
     def __init__(self):
         self.isAlive = True
         self.isAboutToDie = False
-        self.germChar = "#"
+        self.germChar = germ
+        self.noGermChar = germ
 
 
 def randomCellsGenerator():
@@ -51,13 +63,13 @@ def randomCellsGenerator():
             if random.randint(0, 1) == 0:
                 myGerm = MyGerm()
                 myGerm.isAlive = True
-                myGerm.germChar = "#"
+                myGerm.germChar = germ
                 column.append(myGerm)  # Add a living cell.
             else:
 
                 myGerm = MyGerm()
                 myGerm.isAlive = False
-                myGerm.germChar = " "
+                myGerm.germChar = noGerm
                 column.append(myGerm)  # Add a dead cell.
         randCells.append(column)  # randCells is a list of column lists.
     return randCells
@@ -67,20 +79,13 @@ def randomCellsGenerator():
 nextCells = randomCellsGenerator()
 
 
-def centerPrint():
-    for y in range(HEIGHT // 2):
-        print("\n")
-    for y in range(WIDTH // 2):
-        print(" ")
-
-
 def print_centre(s):
     print(s.center(shutil.get_terminal_size().columns))
 
 
 # Just a test function to see if I can print the grid in the center of the terminal
 def printCellsCenter(currentCells):
-    numSpacesX = TERM_WIDTH // 2 - WIDTH // 2
+    numSpacesX = TERM_WIDTH // 2 - cellWidth // 2
     numSpacesY = TERM_HEIGHT // 2 - HEIGHT // 2
     for x in range(numSpacesY):
         print()
@@ -90,13 +95,12 @@ def printCellsCenter(currentCells):
             print(" ", end="")
         for x in range(WIDTH):
             # print(x, y, end="")
-            # print("x", end="")
+            # print(" x ", end="")
             print(currentCells[x][y].germChar, end="")  # Print the # or space.
         print()
 
 
 def printCells(currentCells):
-    centerPrint()
     cells = ""
     # Print currentCells on the screen:
     for y in range(HEIGHT):
