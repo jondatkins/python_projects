@@ -6,7 +6,6 @@ import os
 import sys
 import shutil
 
-# from termcolor import colored, cprint
 
 SLEEP_PERIOD = 1
 HEADER = "\033[95m"
@@ -31,10 +30,10 @@ currentCells = []
 rows, columns = os.popen("stty size", "r").read().split()
 TERM_WIDTH = int(columns)
 TERM_HEIGHT = int(rows)
+# The widht and height of the grid in cells
 WIDTH = 20
 HEIGHT = 20
 
-cellWidth = WIDTH * germ.__len__()
 
 try:
     WIDTH = int(args[0])
@@ -45,6 +44,9 @@ try:
         HEIGHT = TERM_HEIGHT
 except IndexError:
     pass
+
+# The width of the grid is WIDTH * the length of the germ character
+cellWidth = WIDTH * germ.__len__()
 
 
 class MyGerm:
@@ -70,7 +72,6 @@ def randomCellsGenerator():
                 myGerm.germChar = germ
                 column.append(myGerm)  # Add a living cell.
             else:
-
                 myGerm = MyGerm()
                 myGerm.isAlive = False
                 myGerm.germChar = noGerm
@@ -87,9 +88,43 @@ def print_centre(s):
     print(s.center(shutil.get_terminal_size().columns))
 
 
+class bcolors:
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+
+colourDict = {
+    "HEADER": "\033[95m",
+    "OKBLUE": "\033[94m",
+    "OKCYAN": "\033[96m",
+    "OKGREEN": "\033[92m",
+    "WARNING": "\033[93m",
+    "FAIL": "\033[91m",
+    "ENDC": "\033[0m",
+    "BOLD": "\033[1m",
+}
+
+# my_dict = {"Dave": "001", "Ava": "002", "Joe": "003"}
+# print(my_dict.keys())
+# print(my_dict.values())
+# print(my_dict.get("Dave"))
+
+
+colourList = list(colourDict.values())
+# colourList.remove("\033[0m")
+
+
 # Just a test function to see if I can print the grid in the center of the terminal
 def printCellsCenter(currentCells):
-    numSpacesX = TERM_WIDTH // 2 - cellWidth // 2
+    clearScreen()
+    numSpacesX = (TERM_WIDTH // 2) - (cellWidth // 2)
     numSpacesY = TERM_HEIGHT // 2 - HEIGHT // 2
     for x in range(numSpacesY):
         print()
@@ -98,9 +133,24 @@ def printCellsCenter(currentCells):
         for i in range(numSpacesX):
             print(" ", end="")
         for x in range(WIDTH):
-            # print(x, y, end="")
-            # print(" x ", end="")
-            print(currentCells[x][y].germChar, end="")  # Print the # or space.
+            # print(
+            #     f"{bcolors.WARNING}" + currentCells[x][y].germChar + f"{bcolors.ENDC}",
+            #     end="",
+            # )
+            # colourList = list(colourDict.values)
+            colour = random.choice(colourList)
+            # colour = colourDict["OKBLUE"]
+            colourEnd = colourDict["ENDC"]
+            # print(colour)
+            # print(bcolors.WARNING)
+            # print(
+            #     bcolors.WARNING
+            #     + "Warning: No active frommets remain. Continue?"
+            #     + bcolors.ENDC
+            # )
+            cell = currentCells[x][y]
+            foo = colour + cell.germChar + colourEnd
+            print(foo, end="")
         print()
 
 
@@ -110,8 +160,6 @@ def printCells(currentCells):
     for y in range(HEIGHT):
         for x in range(WIDTH):
             print(currentCells[x][y].germChar, end="")  # Print the # or space.
-            # cprint(currentCells[x][y].germChar, "red", end="")  # Print the # or space.
-            # cells += currentCells[x][y]
         print()  # Print a newline at the end of the row.
         # cells += "\n"
     return cells
@@ -129,7 +177,6 @@ def clearScreen():
 
 def printCellGenerations():
     while True:  # Main program loop.
-        # print("\n\n\n\n\n")  # Separate each step with newlines.
         currentCells = copy.deepcopy(nextCells)
 
         # table = printCells(currentCells)
