@@ -32,8 +32,8 @@ rows, columns = os.popen("stty size", "r").read().split()
 TERM_WIDTH = int(columns)
 TERM_HEIGHT = int(rows)
 # The widht and height of the grid in cells
-WIDTH = 30
-HEIGHT = 30
+WIDTH = 10
+HEIGHT = 10
 
 
 try:
@@ -57,6 +57,7 @@ class MyGerm:
     def __init__(self):
         self.isAlive = True
         self.isAboutToDie = False
+        self.isAboutToRevive = False
         self.germChar = germ
         self.noGermChar = germ
 
@@ -67,7 +68,9 @@ def randomCellsGenerator():
     for x in range(WIDTH):
         column = []  # Create a new column.
         for y in range(HEIGHT):
-            if random.randint(0, 1) == 0:
+            # if random.randint(0, 1) == 0:
+            # glider pattern
+            if (x, y) in ((1, 0), (2, 1), (0, 2), (1, 2), (2, 2)):
                 myGerm = MyGerm()
                 myGerm.isAlive = True
                 myGerm.germChar = germ
@@ -190,120 +193,66 @@ def clearScreen():
     # os.system("cls" if os.name == "nt" else "clear")
 
 
-def printCellGenerations():
-    index = 0
-    while True:  # Main program loop.
+def mainLoop():
+    while True:
         currentCells = copy.deepcopy(nextCells)
-
-        # table = printCells(currentCells)
-        # printCells(currentCells)
-        printCellsCenter(currentCells)
-
-        # cprint(table, "green")
-        # print(table)
-        # Calculate the next step's cells based on current step's cells:
-        for x in range(WIDTH):
-            for y in range(HEIGHT):
-                # Get neighboring coordinates:
-                # `% WIDTH` ensures leftCoord is always between 0 and WIDTH - 1
-                leftCoord = (x - 1) % WIDTH
-                rightCoord = (x + 1) % WIDTH
-                aboveCoord = (y - 1) % HEIGHT
-                belowCoord = (y + 1) % HEIGHT
-
-                # Count number of living neighbors:
-                numNeighbors = 0
-                if (
-                    currentCells[leftCoord][aboveCoord].isAlive
-                    and not currentCells[leftCoord][aboveCoord].isAboutToDie
-                ):
-                    numNeighbors += 1  # Top-left neighbor is alive.
-                if (
-                    currentCells[x][aboveCoord].isAlive
-                    and not currentCells[x][aboveCoord].isAboutToDie
-                ):
-                    numNeighbors += 1  # Top neighbor is alive.
-                if (
-                    currentCells[rightCoord][aboveCoord].isAlive
-                    and not currentCells[rightCoord][aboveCoord].isAboutToDie
-                ):
-                    numNeighbors += 1  # Top-right neighbor is alive.
-                if (
-                    currentCells[leftCoord][y].isAlive
-                    and not currentCells[leftCoord][y].isAboutToDie
-                ):
-                    numNeighbors += 1  # Left neighbor is alive.
-                if (
-                    currentCells[rightCoord][y].isAlive
-                    and not currentCells[rightCoord][y].isAboutToDie
-                ):
-                    numNeighbors += 1  # Right neighbor is alive.
-                if (
-                    currentCells[leftCoord][belowCoord].isAlive
-                    and not currentCells[leftCoord][belowCoord].isAboutToDie
-                ):
-                    numNeighbors += 1  # Bottom-left neighbor is alive.
-                if (
-                    currentCells[x][belowCoord].isAlive
-                    and not currentCells[x][belowCoord].isAboutToDie
-                ):
-                    numNeighbors += 1  # Bottom neighbor is alive.
-                if (
-                    currentCells[rightCoord][belowCoord].isAlive
-                    and not currentCells[rightCoord][belowCoord].isAboutToDie
-                ):
-                    numNeighbors += 1  # Bottom-right neighbor is alive.
-
-                # Set cell based on Conway's Game of Life rules:
-                if currentCells[x][y].isAlive and (
-                    numNeighbors == 2 or numNeighbors == 3
-                ):
-                    # Living cells with 2 or 3 neighbors stay alive:
-                    myGerm = MyGerm()
-                    myGerm.isAlive = True
-                    myGerm.germChar = germ
-                    myGerm.isAboutToDie = False
-                    nextCells[x][y] = myGerm
-                elif currentCells[x][y].germChar == noGerm and numNeighbors == 3:
-                    # Dead cells with 3 neighbors become alive:
-                    myGerm = MyGerm()
-                    myGerm.isAlive = True
-                    myGerm.germChar = germ
-                    myGerm.isAboutToDie = False
-                    nextCells[x][y] = myGerm
-                else:
-                    # on even counts, mark the cell for death, but don't kill it.
-                    if index % 2 == 0:
-                        if (
-                            nextCells[x][y].germChar == noGerm
-                            or nextCells[x][y].germChar == goingToDie
-                        ):
-                            # On even index counts, set cells that are about to die, but don't kill them.
-                            myGerm = MyGerm()
-                            myGerm.isAlive = False
-                            myGerm.germChar = noGerm
-                            myGerm.isAboutToDie = False
-                            nextCells[x][y] = myGerm
-                        else:
-                            # On even index counts, set cells that are about to die, but don't kill them.
-                            myGerm = MyGerm()
-                            myGerm.isAlive = True
-                            myGerm.germChar = goingToDie
-                            myGerm.isAboutToDie = True
-                            nextCells[x][y] = myGerm
-                    else:
-                        # On odd counts of the loop, kill cells.
-                        myGerm = MyGerm()
-                        myGerm.isAlive = False
-                        myGerm.germChar = noGerm
-                        myGerm.isAboutToDie = False
-                        nextCells[x][y] = myGerm
-        index += 1
-        print(index)
+        printCellGenerations(currentCells)
         time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
         clearScreen()
 
 
-printCellGenerations()
-# print_centre("Hello World")
-# printCellsCenter()
+def printCellGenerations(currentCells):
+
+    # table = printCells(currentCells)
+    # printCells(currentCells)
+    printCellsCenter(currentCells)
+    # Calculate the next step's cells based on current step's cells:
+    for x in range(WIDTH):
+        for y in range(HEIGHT):
+            # Get neighboring coordinates:
+            # `% WIDTH` ensures leftCoord is always between 0 and WIDTH - 1
+            leftCoord = (x - 1) % WIDTH
+            rightCoord = (x + 1) % WIDTH
+            aboveCoord = (y - 1) % HEIGHT
+            belowCoord = (y + 1) % HEIGHT
+
+            # Count number of living neighbors:
+            numNeighbors = 0
+            if currentCells[leftCoord][aboveCoord].isAlive:
+                numNeighbors += 1  # Top-left neighbor is alive.
+            if currentCells[x][aboveCoord].isAlive:
+                numNeighbors += 1  # Top neighbor is alive.
+            if currentCells[rightCoord][aboveCoord].isAlive:
+                numNeighbors += 1  # Top-right neighbor is alive.
+            if currentCells[leftCoord][y].isAlive:
+                numNeighbors += 1  # Left neighbor is alive.
+            if currentCells[rightCoord][y].isAlive:
+                numNeighbors += 1  # Right neighbor is alive.
+            if currentCells[leftCoord][belowCoord].isAlive:
+                numNeighbors += 1  # Bottom-left neighbor is alive.
+            if currentCells[x][belowCoord].isAlive:
+                numNeighbors += 1  # Bottom neighbor is alive.
+            if currentCells[rightCoord][belowCoord].isAlive:
+                numNeighbors += 1  # Bottom-right neighbor is alive.
+
+            # Set cell based on Conway's Game of Life rules:
+            if currentCells[x][y].isAlive and (numNeighbors == 2 or numNeighbors == 3):
+                # Living cells with 2 or 3 neighbors stay alive:
+                nextCells[x][y].isAlive = True
+                nextCells[x][y].germChar = germ
+                # nextCells[x][y].isAboutToDie = False
+                # nextCells[x][y].isAboutToRevive = True
+            elif numNeighbors == 3:
+                # Dead cells with 3 neighbors become alive:
+                nextCells[x][y].isAlive = True
+                nextCells[x][y].germChar = germ
+                # nextCells[x][y].isAboutToDie = False
+                # nextCells[x][y].isAboutToRevive = True
+            # if not alive, or about to be born, kill the cell
+            else:
+                nextCells[x][y].isAlive = False
+                nextCells[x][y].germChar = noGerm
+                # nextCells[x][y].isAboutToDie = True
+
+
+mainLoop()
