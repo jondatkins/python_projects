@@ -2,3 +2,4 @@ my_env
 .ruff_cache
 inputFiles
 outputFiles
+.venv
