@@ -5,7 +5,8 @@ import copy
 import os
 import sys
 import shutil
-
+import termios
+import tty
 
 SLEEP_PERIOD = 1
 HEADER = "\033[95m"
@@ -68,9 +69,9 @@ def randomCellsGenerator():
     for x in range(WIDTH):
         column = []  # Create a new column.
         for y in range(HEIGHT):
-            # if random.randint(0, 1) == 0:
-            # glider pattern
-            if (x, y) in ((1, 0), (2, 1), (0, 2), (1, 2), (2, 2)):
+            if random.randint(0, 1) == 0:
+                # glider pattern
+                # if (x, y) in ((1, 0), (2, 1), (0, 2), (1, 2), (2, 2)):
                 myGerm = MyGerm()
                 myGerm.isAlive = True
                 myGerm.germChar = germ
@@ -146,10 +147,10 @@ def getCenterStringY():
 # Just a test function to see if I can print the grid in the center of the terminal
 def printCellsCenter(currentCells):
     clearScreen()
-    # getCenterStringY()
+    getCenterStringY()
     for y in range(HEIGHT):
         # push the grid right
-        # getCenterStringX()
+        getCenterStringX()
         for x in range(WIDTH):
             # print(
             #     f"{bcolors.WARNING}" + currentCells[x][y].germChar + f"{bcolors.ENDC}",
@@ -194,11 +195,51 @@ def clearScreen():
 
 
 def mainLoop():
-    while True:
-        currentCells = copy.deepcopy(nextCells)
-        printCellGenerations(currentCells)
-        time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
-        clearScreen()
+    old_settings = termios.tcgetattr(sys.stdin)
+    tty.setcbreak(sys.stdin.fileno())
+    try:
+
+        while True:
+            k = getkey()
+            if k == "esc":
+                quit()
+            else:
+                print(k)
+            currentCells = copy.deepcopy(nextCells)
+            printCellGenerations(currentCells)
+            time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
+            clearScreen()
+            # key = input()
+            # if key == "q":
+            #     sys.exit()
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+
+
+def getkey():
+    old_settings = termios.tcgetattr(sys.stdin)
+    tty.setcbreak(sys.stdin.fileno())
+    try:
+        # while True:
+        b = os.read(sys.stdin.fileno(), 3).decode()
+        if len(b) == 3:
+            k = ord(b[2])
+        else:
+            k = ord(b)
+        key_mapping = {
+            127: "backspace",
+            10: "return",
+            32: "space",
+            9: "tab",
+            27: "esc",
+            65: "up",
+            66: "down",
+            67: "right",
+            68: "left",
+        }
+        return key_mapping.get(k, chr(k))
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
 
 def printCellGenerations(currentCells):
