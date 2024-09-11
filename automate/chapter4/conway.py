@@ -5,8 +5,45 @@ import copy
 import os
 import sys
 import shutil
-import termios
-import tty
+import threading
+
+# import signal
+#
+#
+# def signal_handler(sig, frame):
+#     # print("You pressed Ctrl+C!")
+#     # quit()
+#     sys.exit(0)
+#
+#
+# signal.signal(signal.SIGINT, signal_handler)
+# # print("Press Ctrl+C")
+# # signal.pause()
+#
+#
+# # from https://stackoverflow.com/questions/2408560/non-blocking-console-input
+# class KeyboardThread(threading.Thread):
+#
+#     def __init__(self, input_cbk=None, name="keyboard-input-thread"):
+#         self.input_cbk = input_cbk
+#         super(KeyboardThread, self).__init__(name=name, daemon=True)
+#         self.start()
+#
+#     def run(self):
+#         while True:
+#             self.input_cbk(input())  # waits to get input + Return
+#
+#
+# showcounter = 0  # something to demonstrate the change
+#
+#
+# def my_callback(inp):
+#     # evaluate the keyboard input
+#     print("You Entered:", inp, " Counter is at:", showcounter)
+#
+
+# start the Keyboard thread
+# kthread = KeyboardThread(my_callback)
 
 SLEEP_PERIOD = 1
 HEADER = "\033[95m"
@@ -194,52 +231,24 @@ def clearScreen():
     # os.system("cls" if os.name == "nt" else "clear")
 
 
-def mainLoop():
-    old_settings = termios.tcgetattr(sys.stdin)
-    tty.setcbreak(sys.stdin.fileno())
-    try:
+def getInput():
+    key = input()
+    if key == "q":
+        sys.exit()
 
-        while True:
-            k = getkey()
-            if k == "esc":
-                quit()
-            else:
-                print(k)
+
+def mainLoop():
+    while True:
+        try:
             currentCells = copy.deepcopy(nextCells)
             printCellGenerations(currentCells)
-            time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
+            # time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
+            getInput()
             clearScreen()
-            # key = input()
-            # if key == "q":
-            #     sys.exit()
-    finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-
-
-def getkey():
-    old_settings = termios.tcgetattr(sys.stdin)
-    tty.setcbreak(sys.stdin.fileno())
-    try:
-        # while True:
-        b = os.read(sys.stdin.fileno(), 3).decode()
-        if len(b) == 3:
-            k = ord(b[2])
-        else:
-            k = ord(b)
-        key_mapping = {
-            127: "backspace",
-            10: "return",
-            32: "space",
-            9: "tab",
-            27: "esc",
-            65: "up",
-            66: "down",
-            67: "right",
-            68: "left",
-        }
-        return key_mapping.get(k, chr(k))
-    finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+            # press any key to continue
+        except KeyboardInterrupt:
+            print("Bye")
+            sys.exit()
 
 
 def printCellGenerations(currentCells):
