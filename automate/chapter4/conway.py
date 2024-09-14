@@ -5,45 +5,6 @@ import copy
 import os
 import sys
 import shutil
-import threading
-
-# import signal
-#
-#
-# def signal_handler(sig, frame):
-#     # print("You pressed Ctrl+C!")
-#     # quit()
-#     sys.exit(0)
-#
-#
-# signal.signal(signal.SIGINT, signal_handler)
-# # print("Press Ctrl+C")
-# # signal.pause()
-#
-#
-# # from https://stackoverflow.com/questions/2408560/non-blocking-console-input
-# class KeyboardThread(threading.Thread):
-#
-#     def __init__(self, input_cbk=None, name="keyboard-input-thread"):
-#         self.input_cbk = input_cbk
-#         super(KeyboardThread, self).__init__(name=name, daemon=True)
-#         self.start()
-#
-#     def run(self):
-#         while True:
-#             self.input_cbk(input())  # waits to get input + Return
-#
-#
-# showcounter = 0  # something to demonstrate the change
-#
-#
-# def my_callback(inp):
-#     # evaluate the keyboard input
-#     print("You Entered:", inp, " Counter is at:", showcounter)
-#
-
-# start the Keyboard thread
-# kthread = KeyboardThread(my_callback)
 
 SLEEP_PERIOD = 1
 HEADER = "\033[95m"
@@ -61,7 +22,7 @@ if args is None:
 
 # germ = ""
 germ = " # "
-noGerm = "   "
+noGerm = " - "
 goingToDie = " X "
 currentCells = []
 
@@ -100,30 +61,7 @@ class MyGerm:
         self.noGermChar = germ
 
 
-def randomCellsGenerator():
-    # Create a list of list for the cells:
-    randCells = []
-    for x in range(WIDTH):
-        column = []  # Create a new column.
-        for y in range(HEIGHT):
-            if random.randint(0, 1) == 0:
-                # glider pattern
-                # if (x, y) in ((1, 0), (2, 1), (0, 2), (1, 2), (2, 2)):
-                myGerm = MyGerm()
-                myGerm.isAlive = True
-                myGerm.germChar = germ
-                column.append(myGerm)  # Add a living cell.
-            else:
-                myGerm = MyGerm()
-                myGerm.isAlive = False
-                myGerm.germChar = noGerm
-                column.append(myGerm)  # Add a dead cell.
-        randCells.append(column)  # randCells is a list of column lists.
-    return randCells
-
-
 # Start process with random grid of cells
-nextCells = randomCellsGenerator()
 
 
 def print_centre(s):
@@ -153,14 +91,34 @@ colourDict = {
     "BOLD": "\033[1m",
 }
 
-# my_dict = {"Dave": "001", "Ava": "002", "Joe": "003"}
-# print(my_dict.keys())
-# print(my_dict.values())
-# print(my_dict.get("Dave"))
-
 
 colourList = list(colourDict.values())
 # colourList.remove("\033[0m")
+
+
+def randomCellsGenerator():
+    # Create a list of list for the cells:
+    randCells = []
+    for x in range(WIDTH):
+        column = []  # Create a new column.
+        for y in range(HEIGHT):
+            if random.randint(0, 1) == 0:
+                # glider pattern
+                # if (x, y) in ((1, 0), (2, 1), (0, 2), (1, 2), (2, 2)):
+                myGerm = MyGerm()
+                myGerm.isAlive = True
+                myGerm.germChar = germ
+                column.append(myGerm)  # Add a living cell.
+            else:
+                myGerm = MyGerm()
+                myGerm.isAlive = False
+                myGerm.germChar = noGerm
+                column.append(myGerm)  # Add a dead cell.
+        randCells.append(column)  # randCells is a list of column lists.
+    return randCells
+
+
+nextCells = randomCellsGenerator()
 
 
 def getCenterStringX():
@@ -175,39 +133,56 @@ def getCenterStringX():
         print(" ", end="")
 
 
+def getCenterStringX2():
+    # push the grid right
+    widthSpacerString = ""
+    numSpacesX = (TERM_WIDTH // 2) - (cellWidth // 2)
+    for i in range(numSpacesX):
+        # print(" ", end="")
+        widthSpacerString += " "
+    return widthSpacerString
+
+
 def getCenterStringY():
     numSpacesY = TERM_HEIGHT // 2 - HEIGHT // 2
     for x in range(numSpacesY):
         print()
 
 
-# Just a test function to see if I can print the grid in the center of the terminal
-def printCellsCenter(currentCells):
+def getCenterStringY2():
+    numSpacesY = TERM_HEIGHT // 2 - HEIGHT // 2
+    carrReturn = ""
+    for x in range(numSpacesY):
+        carrReturn += "\n"
+    return carrReturn
+
+
+# gets a random colour for each cell in the grid.
+def getColouredCharacter(germChar):
+    colour = random.choice(colourList)
+    colourEnd = colourDict["ENDC"]
+    foo = colour + germChar + colourEnd
+    return foo
+
+
+# prints cell grid in centre of terminal
+def printCellsCenter(currentCells, markedCells=False):
     clearScreen()
-    getCenterStringY()
+    # getCenterStringY()
+    cells = ""
+    newLines = getCenterStringY2()
+    print(newLines, end="")
     for y in range(HEIGHT):
-        # push the grid right
-        getCenterStringX()
+        cells += getCenterStringX2()
         for x in range(WIDTH):
-            # print(
-            #     f"{bcolors.WARNING}" + currentCells[x][y].germChar + f"{bcolors.ENDC}",
-            #     end="",
-            # )
-            # colourList = list(colourDict.values)
-            colour = random.choice(colourList)
-            # colour = colourDict["OKBLUE"]
-            colourEnd = colourDict["ENDC"]
-            # print(colour)
-            # print(bcolors.WARNING)
-            # print(
-            #     bcolors.WARNING
-            #     + "Warning: No active frommets remain. Continue?"
-            #     + bcolors.ENDC
-            # )
             cell = currentCells[x][y]
-            foo = colour + cell.germChar + colourEnd
-            print(foo, end="")
-        print()
+            germChar = cell.germChar
+            # if cell.isAboutToDie:
+            #     germChar = goingToDie
+            foo = getColouredCharacter(germChar)
+            cells += foo
+        cells += "\n"
+    print(cells)
 
 
 def printCells(currentCells):
@@ -241,8 +216,13 @@ def mainLoop():
     while True:
         try:
             currentCells = copy.deepcopy(nextCells)
-            printCellGenerations(currentCells)
+            printCellsCenter(currentCells)
+            liveOrDieDecider(currentCells)
             # time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
+            # press return to continue
+            getInput()
+            # print marked cells here?
+            printCellsCenter(currentCells, True)
             getInput()
             clearScreen()
             # press any key to continue
@@ -251,11 +231,9 @@ def mainLoop():
             sys.exit()
 
 
-def printCellGenerations(currentCells):
+# Works out which cells live and die
+def liveOrDieDecider(currentCells):
 
-    # table = printCells(currentCells)
-    # printCells(currentCells)
-    printCellsCenter(currentCells)
     # Calculate the next step's cells based on current step's cells:
     for x in range(WIDTH):
         for y in range(HEIGHT):
@@ -290,19 +268,19 @@ def printCellGenerations(currentCells):
                 # Living cells with 2 or 3 neighbors stay alive:
                 nextCells[x][y].isAlive = True
                 nextCells[x][y].germChar = germ
-                # nextCells[x][y].isAboutToDie = False
+                nextCells[x][y].isAboutToDie = False
                 # nextCells[x][y].isAboutToRevive = True
             elif numNeighbors == 3:
                 # Dead cells with 3 neighbors become alive:
                 nextCells[x][y].isAlive = True
                 nextCells[x][y].germChar = germ
-                # nextCells[x][y].isAboutToDie = False
+                nextCells[x][y].isAboutToDie = False
                 # nextCells[x][y].isAboutToRevive = True
-            # if not alive, or about to be born, kill the cell
+            # if not alive, or about to be born,            the cell
             else:
                 nextCells[x][y].isAlive = False
                 nextCells[x][y].germChar = noGerm
-                # nextCells[x][y].isAboutToDie = True
+                nextCells[x][y].isAboutToDie = True
 
 
 mainLoop()
