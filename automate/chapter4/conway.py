@@ -22,7 +22,7 @@ if args is None:
 
 # germ = ""
 germ = " # "
-noGerm = " - "
+noGerm = "   "
 goingToDie = " X "
 currentCells = []
 
@@ -59,9 +59,6 @@ class MyGerm:
         self.isAboutToRevive = False
         self.germChar = germ
         self.noGermChar = germ
-
-
-# Start process with random grid of cells
 
 
 def print_centre(s):
@@ -102,16 +99,18 @@ def randomCellsGenerator():
     for x in range(WIDTH):
         column = []  # Create a new column.
         for y in range(HEIGHT):
-            if random.randint(0, 1) == 0:
-                # glider pattern
-                # if (x, y) in ((1, 0), (2, 1), (0, 2), (1, 2), (2, 2)):
+            # if random.randint(0, 1) == 0:
+            # glider pattern
+            if (x, y) in ((1, 0), (2, 1), (0, 2), (1, 2), (2, 2)):
                 myGerm = MyGerm()
                 myGerm.isAlive = True
+                myGerm.isAboutToDie = False
                 myGerm.germChar = germ
                 column.append(myGerm)  # Add a living cell.
             else:
                 myGerm = MyGerm()
                 myGerm.isAlive = False
+                myGerm.isAboutToDie = False
                 myGerm.germChar = noGerm
                 column.append(myGerm)  # Add a dead cell.
         randCells.append(column)  # randCells is a list of column lists.
@@ -166,14 +165,14 @@ def getColouredCharacter(germChar):
 
 
 # prints cell grid in centre of terminal
-def printCellsCenter(currentCells, markedCells=False):
+def printCellsCenter(currentCells):
     clearScreen()
     # getCenterStringY()
     cells = ""
     newLines = getCenterStringY2()
-    print(newLines, end="")
+    # print(newLines, end="")
     for y in range(HEIGHT):
-        cells += getCenterStringX2()
+        # cells += getCenterStringX2()
         for x in range(WIDTH):
             cell = currentCells[x][y]
             germChar = cell.germChar
@@ -212,6 +211,7 @@ def getInput():
         sys.exit()
 
 
+# Main program loop
 def mainLoop():
     while True:
         try:
@@ -221,14 +221,32 @@ def mainLoop():
             # time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
             # press return to continue
             getInput()
+            # markDeadCells(currentCells)
             # print marked cells here?
-            printCellsCenter(currentCells, True)
+            printCellsCenter(currentCells)
             getInput()
             clearScreen()
             # press any key to continue
         except KeyboardInterrupt:
             print("Bye")
             sys.exit()
+
+
+# Cells about to die, but not dead, should have the about to die character. Don't change other cells
+def markDeadCells(currentCells):
+    for x in range(WIDTH):
+        for y in range(HEIGHT):
+            if currentCells[x][y].isAboutToDie:
+                nextCells[x][y].isAboutToDie = False
+                nextCells[x][y].germChar = goingToDie
+            # elif currentCells[x][y].:
+            # nextCells[x][y].isAboutToRevive = True
+            # elif currentCells[x][y].isAlive:
+            #     nextCells[x][y].isAboutToDie = False
+            # else:
+            #     nextCells[x][y].isAlive =
+            #     nextCells[x][y].germChar = germ
+            #     nextCells[x][y].isAboutToDie = False
 
 
 # Works out which cells live and die
@@ -280,7 +298,17 @@ def liveOrDieDecider(currentCells):
             else:
                 nextCells[x][y].isAlive = False
                 nextCells[x][y].germChar = noGerm
-                nextCells[x][y].isAboutToDie = True
+                nextCells[x][y].isAboutToDie = False
+                # if the cell is alive, mark it as going to die
+                # if currentCells[x][y].isAlive:
+                #     nextCells[x][y].isAlive = False
+                #     nextCells[x][y].germChar = goingToDie
+                #     nextCells[x][y].isAboutToDie = True
+                # otherwise, just kill as normal
+                # else:
+                #     nextCells[x][y].isAlive = False
+                #     nextCells[x][y].germChar = noGerm
+                #     nextCells[x][y].isAboutToDie = False
 
 
 mainLoop()
