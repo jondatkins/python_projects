@@ -221,7 +221,7 @@ def mainLoop():
             # time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
             # press return to continue
             getInput()
-            # markDeadCells(currentCells)
+            markDeadCells(currentCells)
             # print marked cells here?
             printCellsCenter(currentCells)
             getInput()
