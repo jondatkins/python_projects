@@ -32,9 +32,6 @@ for experimentNumber in range(experimentRange):
         headsOrTails.append(random.choice(headsTails))
     # headsOrTails = testToss
     # Code that checks if there is a streak of 6 heads or tails in a row.
-    hCount = 0
-    tCount = 0
-    # print(headsOrTails)
     i = 0
     end = coinTossLength
     while i < coinTossLength:
@@ -52,8 +49,10 @@ for experimentNumber in range(experimentRange):
         if matchCount == streakLength:
             numberOfStreaks += 1
             i = i + streakLength
+            # We're only looking for one streak in our run of 100 coin tosses, so break to outer loop here
+            break
         else:
             i = i + 1
-
-print("Chance of streak: %s%%" % (numberOfStreaks / coinTossLength / experimentRange))
+# numberOfStreaks / 10000 * 100 is the same as numberOfStreaks / 100
+print("Chance of streak: %s%%" % (numberOfStreaks / coinTossLength))
 print("Number of streaks: %s" % numberOfStreaks)
