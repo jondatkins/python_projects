@@ -1,6 +1,6 @@
 import os
-import sys
 import random
+import sys
 import time
 
 rows, columns = os.popen("stty size", "r").read().split()
@@ -49,16 +49,24 @@ def getCenterStringY2():
 def clearScreen():
     #     update terminal without flickering, as described at:
     #    https://stackoverflow.com/questions/69870429/how-can-i-update-clear-the-console-without-blinking-in-python
-    # print("")
     termHeightPlusOne = TERM_HEIGHT
     termHeightPlusOne = str(termHeightPlusOne)
     print("\033[" + termHeightPlusOne + "A\033[2K", end="")
     # os.system("cls" if os.name == "nt" else "clear")
 
 
+def getRandomMove():
+    emptyList = []
+    for k in theBoard.keys():
+        if theBoard[k] == " ":
+            emptyList.append(k)
+    return random.choice(emptyList)
+
+
 def printBoard(board):
+    clearScreen()
     center_x_string = getCenterStringX2()
-    # print(getCenterStringY2())
+    print(getCenterStringY2())
     print(
         center_x_string + board["top-L"] + "|" + board["top-M"] + "|" + board["top-R"]
     )
@@ -73,47 +81,111 @@ def printBoard(board):
     # clearScreen()
 
 
-def getRandomMove():
-    emptyList = []
-    for k in theBoard.keys():
-        # print(k + " ", end="")
-        if theBoard[k] == " ":
-            emptyList.append(k)
-    # print("possible moves are ")
-    # print(emptyList)
-    # print("random move is")
-    # print(random.choice(emptyList))
-    return random.choice(emptyList)
+def print2dArray(twoDArray):
+    i = 0
+    j = 0
+    while i < 3:
+        while j < 3:
+            print(twoDArray[i][j] + " ", end="")
+            j += 1
+        streakCount = 0
+        print()
+        j = 0
+        i += 1
+
+
+def dictToArray(dict):
+    noughtsAndCrosses = [
+        [dict["top-L"], dict["top-M"], dict["top-R"]],
+        [dict["mid-L"], dict["mid-M"], dict["mid-R"]],
+        [dict["low-L"], dict["low-M"], dict["low-R"]],
+    ]
+    return noughtsAndCrosses
 
 
 # Each time a player makes a move, check if they have won.
 # For each position, check the cells in the column and row.
 # For corners, or the center, check the diagonal.
-def isGameWon(turn, move):
-    print("turn is" + turn)
-    print("move is " + move)
-    if "top" in move:
-        print("Your in the top row")
-    elif "mid" in move:
-        print("Your in the top row")
-    elif "low" in move:
-        print("Your in the top row")
-    if "L" in move:
-        print("Your in the Left column")
-    if "M" in move:
-        print("Your in the Left column")
-    if "R" in move:
-        print("Your in the Left column")
-    emptyList = []
-    twoDArray = []
-    for k in theBoard.keys():
-        print(k, end="")
+def isGameWon(turn, boardDict):
+    noughtsAndCrosses = dictToArray(boardDict)
+    streakCount = 0
+    # check rows for winning streak
+    i = 0
+    j = 0
+    while i < 3:
+        while j < 3:
+            # print(noughtsAndCrosses[i][j] + " ", end="")
+            if turn == noughtsAndCrosses[i][j]:
+                streakCount += 1
+            j += 1
+            if streakCount == 3:
+                print("row of 3")
+                return True
+        streakCount = 0
+        print()
+        j = 0
+        i += 1
 
-    # print(theBoard[k])
+    # check columns for a win
+    streakCount = 0
+    i = 0
+    j = 0
+
+    while j < 3:
+        while i < 3:
+            # print(noughtsAndCrosses[i][j] + " ")
+            if turn == noughtsAndCrosses[i][j]:
+                streakCount += 1
+            i += 1
+            if streakCount == 3:
+                print("column of 3")
+                return True
+        j += 1
+        i = 0
+        streakCount = 0
+        print()
+
+    if streakCount == 3:
+        return True
+
+    # check left top to bottom right diagonal
+    streakCount = 0
+    i = 0
+    j = 0
+    while i < 3:
+        while j < 3:
+            # print(noughtsAndCrossesTest[i][j] + " ")
+            if turn == noughtsAndCrosses[i][j]:
+                streakCount += 1
+            j += 1
+            i += 1
+        print()
+
+    if streakCount == 3:
+        print("1st diagonal")
+        return True
+
+    # check top right to bottom left diagonal
+    streakCount = 0
+    i = 2
+    j = 2
+    while i >= 0:
+        while j >= 0:
+            if turn == noughtsAndCrosses[i][j]:
+                streakCount += 1
+            j -= 1
+            i -= 1
+        print()
+    if streakCount == 3:
+        print("2nd diagonal")
+        return True
+
+    return False
 
 
 def mainLoop():
     turn = "X"
+    gameWon = False
     for i in range(9):
 
         try:
@@ -125,15 +197,43 @@ def mainLoop():
             move = getRandomMove()
             move = str(move)
             theBoard[move] = turn
-            isGameWon(turn, move)
+            printBoard(theBoard)
+            gameWon = isGameWon(turn, theBoard)
+            if gameWon:
+                print(turn + " won")
+                break
             if turn == "X":
                 turn = "O"
             else:
                 turn = "X"
-            printBoard(theBoard)
         except KeyboardInterrupt:
             print("Bye")
             sys.exit()
+    if not gameWon:
+        print("Game Drawn")
+
+
+def testGame():
+    gameWon = False
+    turn = "O"
+    testBoard = {
+        "top-L": " ",
+        "top-M": " ",
+        "top-R": "O",
+        "mid-L": "X",
+        "mid-M": "X",
+        "mid-R": "O",
+        "low-L": " ",
+        "low-M": " ",
+        "low-R": "O",
+    }
+    twoDArray = dictToArray(testBoard)
+    print2dArray(twoDArray)
+
+    printBoard(testBoard)
+    gameWon = isGameWon(turn, testBoard)
+    print("game won " + str(gameWon))
 
 
 mainLoop()
+# testGame()
