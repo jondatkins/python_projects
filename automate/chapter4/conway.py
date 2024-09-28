@@ -160,8 +160,8 @@ def getCenterStringY2():
 def getColouredCharacter(germChar):
     colour = random.choice(colourList)
     colourEnd = colourDict["ENDC"]
-    foo = colour + germChar + colourEnd
-    return foo
+    colourChar = colour + germChar + colourEnd
+    return colourChar
 
 
 # prints cell grid in centre of terminal

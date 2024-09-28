@@ -11,21 +11,47 @@ WIDTH = 10
 HEIGHT = 10
 SLEEP_PERIOD = 1
 
-theBoard = {
-    "top-L": " ",
-    "top-M": " ",
-    "top-R": " ",
-    "mid-L": " ",
-    "mid-M": " ",
-    "mid-R": " ",
-    "low-L": " ",
-    "low-M": " ",
-    "low-R": " ",
-}
+
+def getNewBoard():
+    theBoard = {
+        "top-L": " ",
+        "top-M": " ",
+        "top-R": " ",
+        "mid-L": " ",
+        "mid-M": " ",
+        "mid-R": " ",
+        "low-L": " ",
+        "low-M": " ",
+        "low-R": " ",
+    }
+    return theBoard
+
+
 player1 = "X"
 player2 = "O"
 cellWidth = WIDTH * len(player1)
 # print("cellwidth is " + str(cellWidth))
+
+colourDict = {
+    "HEADER": "\033[95m",
+    "OKBLUE": "\033[94m",
+    "OKCYAN": "\033[96m",
+    "OKGREEN": "\033[92m",
+    "WARNING": "\033[93m",
+    "FAIL": "\033[91m",
+    "ENDC": "\033[0m",
+    "BOLD": "\033[1m",
+}
+
+colourList = list(colourDict.values())
+
+
+# gets a random colour for each cell in the grid.
+def getColouredCharacter(char):
+    colour = random.choice(colourList)
+    colourEnd = colourDict["ENDC"]
+    colourChar = colour + char + colourEnd
+    return colourChar
 
 
 def getCenterStringX2():
@@ -55,7 +81,7 @@ def clearScreen():
     # os.system("cls" if os.name == "nt" else "clear")
 
 
-def getRandomMove():
+def getRandomMove(theBoard):
     emptyList = []
     for k in theBoard.keys():
         if theBoard[k] == " ":
@@ -64,7 +90,6 @@ def getRandomMove():
 
 
 def printBoard(board):
-    clearScreen()
     center_x_string = getCenterStringX2()
     print(getCenterStringY2())
     print(
@@ -78,7 +103,6 @@ def printBoard(board):
     print(
         center_x_string + board["low-L"] + "|" + board["low-M"] + "|" + board["low-R"]
     )
-    # clearScreen()
 
 
 def print2dArray(twoDArray):
@@ -106,8 +130,8 @@ def dictToArray(dict):
 # Each time a player makes a move, check if they have won.
 # For each position, check the cells in the column and row.
 # For corners, or the center, check the diagonal.
-def isGameWon(turn, boardDict):
-    noughtsAndCrosses = dictToArray(boardDict)
+def isGameWon(turn, noughtsAndCrosses):
+    # noughtsAndCrosses = dictToArray(boardDict)
     streakCount = 0
     # check rows for winning streak
     i = 0
@@ -115,7 +139,7 @@ def isGameWon(turn, boardDict):
     while i < 3:
         while j < 3:
             # print(noughtsAndCrosses[i][j] + " ", end="")
-            if turn == noughtsAndCrosses[i][j]:
+            if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             j += 1
             if streakCount == 3:
@@ -134,7 +158,7 @@ def isGameWon(turn, boardDict):
     while j < 3:
         while i < 3:
             # print(noughtsAndCrosses[i][j] + " ")
-            if turn == noughtsAndCrosses[i][j]:
+            if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             i += 1
             if streakCount == 3:
@@ -155,7 +179,7 @@ def isGameWon(turn, boardDict):
     while i < 3:
         while j < 3:
             # print(noughtsAndCrossesTest[i][j] + " ")
-            if turn == noughtsAndCrosses[i][j]:
+            if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             j += 1
             i += 1
@@ -171,7 +195,7 @@ def isGameWon(turn, boardDict):
     j = 2
     while i >= 0:
         while j >= 0:
-            if turn == noughtsAndCrosses[i][j]:
+            if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             j -= 1
             i -= 1
@@ -183,9 +207,10 @@ def isGameWon(turn, boardDict):
     return False
 
 
-def mainLoop():
+def mainLoop(oWinNum, xWinNum):
     turn = "X"
     gameWon = False
+    theBoard = getNewBoard()
     for i in range(9):
 
         try:
@@ -194,15 +219,28 @@ def mainLoop():
             time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
             # print("Turn for " + turn + ". Move on which space?")
             # move = input()
-            move = getRandomMove()
+            move = getRandomMove(theBoard)
             move = str(move)
-            theBoard[move] = turn
+
+            colouredTurn = getColouredCharacter(turn)
+            theBoard[move] = colouredTurn
+            clearScreen()
             printBoard(theBoard)
-            gameWon = isGameWon(turn, theBoard)
+            noughtsAndCrosses = dictToArray(theBoard)
+            gameWon = isGameWon(turn, noughtsAndCrosses)
             if gameWon:
-                print(turn + " won")
+                if turn == "O":
+                    oWinNum += 1
+                    print("O won " + str(oWinNum))
+                    print()
+                else:
+                    xWinNum += 1
+                    print("X won " + str(xWinNum))
+                    print()
+                # print(turn + " won")
                 break
-            if turn == "X":
+            # if turn == "X":
+            if "X" in turn:
                 turn = "O"
             else:
                 turn = "X"
@@ -211,18 +249,23 @@ def mainLoop():
             sys.exit()
     if not gameWon:
         print("Game Drawn")
+        print()
+    return [oWinNum, xWinNum]
 
 
 def testGame():
     gameWon = False
     turn = "O"
+    turn1 = getColouredCharacter("O")
+    turn2 = getColouredCharacter("O")
+    turn3 = getColouredCharacter("O")
     testBoard = {
-        "top-L": " ",
-        "top-M": " ",
-        "top-R": "O",
+        "top-L": turn1,
+        "top-M": turn2,
+        "top-R": turn3,
         "mid-L": "X",
         "mid-M": "X",
-        "mid-R": "O",
+        "mid-R": " ",
         "low-L": " ",
         "low-M": " ",
         "low-R": "O",
@@ -231,9 +274,20 @@ def testGame():
     print2dArray(twoDArray)
 
     printBoard(testBoard)
-    gameWon = isGameWon(turn, testBoard)
+    gameWon = isGameWon(turn, twoDArray)
     print("game won " + str(gameWon))
 
 
-mainLoop()
-# testGame()
+def gameLoop():
+    oWinNum = 0
+    xWinNum = 0
+    winStats = []
+    for i in range(5):
+        winStats = mainLoop(oWinNum, xWinNum)
+        oWinNum = winStats[0]
+        xWinNum = winStats[1]
+        # testGame()
+    print(winStats)
+
+
+gameLoop()
