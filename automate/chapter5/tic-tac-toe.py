@@ -5,12 +5,12 @@ import sys
 import time
 
 # The widht and height of the grid in cells
-WIDTH = 10
-HEIGHT = 10
-SLEEP_PERIOD = 0.5
-NUM_GAME_LOOPS = 6
+# WIDTH = 10
+# HEIGHT = 10
+SLEEP_PERIOD = 1
+NUM_GAME_LOOPS = 1
 PLAYERS = ("X", "Y")
-GRID_WIDTH = 3
+GRID_SIZE = 4
 
 
 def getTerminalSize():
@@ -35,14 +35,14 @@ def getNewBoard():
 
 
 def getNewBoard2():
-    w, h = GRID_WIDTH, GRID_WIDTH
+    w, h = GRID_SIZE, GRID_SIZE
     Matrix = [[" " for x in range(w)] for y in range(h)]
     return Matrix
 
 
 player1 = "X"
 player2 = "O"
-cellWidth = WIDTH * len(player1)
+cellWidth = GRID_SIZE * len(player1)
 
 colourDict = {
     "HEADER": "\033[95m",
@@ -81,7 +81,8 @@ def getCenterStringX():
 def getCenterStringY():
     termSizeDict = getTerminalSize()
     termHeight = termSizeDict["termHeight"]
-    numSpacesY = termHeight // 2 - HEIGHT // 2
+    numSpacesY = termHeight // 2 - GRID_SIZE // 2
+    # numSpacesY = 13
     carrReturn = ""
     for x in range(numSpacesY):
         carrReturn += "\n"
@@ -118,8 +119,8 @@ def getRandomMove2(theBoard):
     j = 0
     k = 0
     arrayCopy = []
-    while i < GRID_WIDTH:
-        while j < GRID_WIDTH:
+    while i < GRID_SIZE:
+        while j < GRID_SIZE:
             if theBoard[i][j] == " ":
                 matrixCoord = (i, j)
                 arrayCopy.append(matrixCoord)
@@ -150,25 +151,42 @@ def printBoard(board):
     )
 
 
+def getHorizontalLines():
+    line = "-"
+    spacer = "+"
+    horizline = ""
+    for i in range(GRID_SIZE):
+        if i == GRID_SIZE - 1:
+            horizline = horizline + line
+        else:
+            horizline = horizline + line + spacer
+    return horizline
+
+
+# "-+-+-"
+
+
 # Prints the 2d Array version of the board.
 def printBoard2(board):
     center_x_string = getCenterStringX()
+    horizLine = getHorizontalLines()
     # push the grid down the terminal to the midway point.
     print(getCenterStringY())
     i = 0
     j = 0
-    while i < GRID_WIDTH:
+    while i < GRID_SIZE:
         print(center_x_string, end="")
-        while j < GRID_WIDTH:
-            if j == GRID_WIDTH - 1:
+        while j < GRID_SIZE:
+            if j == GRID_SIZE - 1:
                 print(board[i][j], end="")
             else:
                 print(board[i][j] + "|", end="")
             j += 1
         print()
 
-        if i != GRID_WIDTH - 1:
-            print(center_x_string + "-+-+-")
+        if i != GRID_SIZE - 1:
+            print(center_x_string + horizLine)
+            # print(horizLine)
         j = 0
         i += 1
 
@@ -203,12 +221,12 @@ def isGameWon(turn, noughtsAndCrosses):
     # check rows for winning streak
     i = 0
     j = 0
-    while i < GRID_WIDTH:
-        while j < GRID_WIDTH:
+    while i < GRID_SIZE:
+        while j < GRID_SIZE:
             if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             j += 1
-            if streakCount == GRID_WIDTH:
+            if streakCount == GRID_SIZE:
                 return True
         streakCount = 0
         print()
@@ -220,34 +238,34 @@ def isGameWon(turn, noughtsAndCrosses):
     i = 0
     j = 0
 
-    while j < GRID_WIDTH:
-        while i < GRID_WIDTH:
+    while j < GRID_SIZE:
+        while i < GRID_SIZE:
             if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             i += 1
-            if streakCount == GRID_WIDTH:
+            if streakCount == GRID_SIZE:
                 return True
         j += 1
         i = 0
         streakCount = 0
         print()
 
-    if streakCount == GRID_WIDTH:
+    if streakCount == GRID_SIZE:
         return True
 
     # check left top to bottom right diagonal
     streakCount = 0
     i = 0
     j = 0
-    while i < GRID_WIDTH:
-        while j < GRID_WIDTH:
+    while i < GRID_SIZE:
+        while j < GRID_SIZE:
             if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             j += 1
             i += 1
         print()
 
-    if streakCount == GRID_WIDTH:
+    if streakCount == GRID_SIZE:
         return True
 
     # check top right to bottom left diagonal
@@ -261,7 +279,7 @@ def isGameWon(turn, noughtsAndCrosses):
             j -= 1
             i -= 1
         print()
-    if streakCount == GRID_WIDTH:
+    if streakCount == GRID_SIZE:
         return True
 
     return False
@@ -310,7 +328,7 @@ def mainLoop2(oWinNum, xWinNum):
     turn = random.choice(PLAYERS)
     gameWon = False
     theBoard = getNewBoard2()
-    for i in range(GRID_WIDTH * GRID_WIDTH):
+    for i in range(GRID_SIZE * GRID_SIZE):
 
         try:
             time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
@@ -320,7 +338,7 @@ def mainLoop2(oWinNum, xWinNum):
 
             colouredTurn = getColouredCharacter(turn)
             theBoard[move[0]][move[1]] = colouredTurn
-            clearScreen()
+            # clearScreen()
             printBoard2(theBoard)
             gameWon = isGameWon(turn, theBoard)
             if gameWon:
