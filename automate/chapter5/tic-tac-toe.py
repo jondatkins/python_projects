@@ -1,5 +1,6 @@
 import os
 import random
+from re import M
 import sys
 import time
 
@@ -9,7 +10,10 @@ TERM_HEIGHT = int(rows)
 # The widht and height of the grid in cells
 WIDTH = 10
 HEIGHT = 10
-SLEEP_PERIOD = 1
+SLEEP_PERIOD = 0.5
+NUM_GAME_LOOPS = 1
+PLAYERS = ("X", "Y")
+GRID_WIDTH = 3
 
 
 def getNewBoard():
@@ -25,6 +29,21 @@ def getNewBoard():
         "low-R": " ",
     }
     return theBoard
+
+
+def getNewBoard2():
+    # board = []
+    # Creates a list containing 5 lists, each of 8 items, all set to 0
+    w, h = GRID_WIDTH, GRID_WIDTH
+    Matrix = [[" " for x in range(w)] for y in range(h)]
+    # i = 0
+    # j = 0
+    # while i < 3:
+    #     while j < 3:
+    #         Matrix[i][j] = " "
+    #     j = 0
+    #     i += 1
+    return Matrix
 
 
 player1 = "X"
@@ -89,6 +108,26 @@ def getRandomMove(theBoard):
     return random.choice(emptyList)
 
 
+def getRandomMove2(theBoard):
+    i = 0
+    j = 0
+    k = 0
+    arrayCopy = []
+    while i < GRID_WIDTH:
+        while j < GRID_WIDTH:
+            if theBoard[i][j] == " ":
+                matrixCoord = (i, j)
+                arrayCopy.append(matrixCoord)
+                k += 1
+            j += 1
+        j = 0
+        i += 1
+    # print(arrayCopy)
+    randIndex = random.randint(0, len(arrayCopy) - 1)
+    # print(randIndex)
+    return arrayCopy[randIndex]
+
+
 def printBoard(board):
     center_x_string = getCenterStringX2()
     print(getCenterStringY2())
@@ -105,6 +144,29 @@ def printBoard(board):
     )
 
 
+def printBoard2(board):
+    center_x_string = getCenterStringX2()
+    print(getCenterStringY2())
+    i = 0
+    j = 0
+    while i < GRID_WIDTH:
+        print(center_x_string, end="")
+        while j < GRID_WIDTH:
+            if j == GRID_WIDTH - 1:
+                print(board[i][j], end="")
+            else:
+                print(board[i][j] + "|", end="")
+            j += 1
+        # print(center_x_string, end="")
+        print()
+
+        if i != GRID_WIDTH - 1:
+            print(center_x_string + "-+-+-")
+        # print("\n-+-+-")
+        j = 0
+        i += 1
+
+
 def print2dArray(twoDArray):
     i = 0
     j = 0
@@ -112,7 +174,6 @@ def print2dArray(twoDArray):
         while j < 3:
             print(twoDArray[i][j] + " ", end="")
             j += 1
-        streakCount = 0
         print()
         j = 0
         i += 1
@@ -128,22 +189,19 @@ def dictToArray(dict):
 
 
 # Each time a player makes a move, check if they have won.
-# For each position, check the cells in the column and row.
-# For corners, or the center, check the diagonal.
+# check rows, columns and diagonals, return true if there's a
+# winning streak of 3
 def isGameWon(turn, noughtsAndCrosses):
-    # noughtsAndCrosses = dictToArray(boardDict)
     streakCount = 0
     # check rows for winning streak
     i = 0
     j = 0
-    while i < 3:
-        while j < 3:
-            # print(noughtsAndCrosses[i][j] + " ", end="")
+    while i < GRID_WIDTH:
+        while j < GRID_WIDTH:
             if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             j += 1
-            if streakCount == 3:
-                print("row of 3")
+            if streakCount == GRID_WIDTH:
                 return True
         streakCount = 0
         print()
@@ -155,38 +213,34 @@ def isGameWon(turn, noughtsAndCrosses):
     i = 0
     j = 0
 
-    while j < 3:
-        while i < 3:
-            # print(noughtsAndCrosses[i][j] + " ")
+    while j < GRID_WIDTH:
+        while i < GRID_WIDTH:
             if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             i += 1
-            if streakCount == 3:
-                print("column of 3")
+            if streakCount == GRID_WIDTH:
                 return True
         j += 1
         i = 0
         streakCount = 0
         print()
 
-    if streakCount == 3:
+    if streakCount == GRID_WIDTH:
         return True
 
     # check left top to bottom right diagonal
     streakCount = 0
     i = 0
     j = 0
-    while i < 3:
-        while j < 3:
-            # print(noughtsAndCrossesTest[i][j] + " ")
+    while i < GRID_WIDTH:
+        while j < GRID_WIDTH:
             if turn in noughtsAndCrosses[i][j]:
                 streakCount += 1
             j += 1
             i += 1
         print()
 
-    if streakCount == 3:
-        print("1st diagonal")
+    if streakCount == GRID_WIDTH:
         return True
 
     # check top right to bottom left diagonal
@@ -200,26 +254,25 @@ def isGameWon(turn, noughtsAndCrosses):
             j -= 1
             i -= 1
         print()
-    if streakCount == 3:
-        print("2nd diagonal")
+    if streakCount == GRID_WIDTH:
         return True
 
     return False
 
 
 def mainLoop(oWinNum, xWinNum):
-    turn = "X"
+    turn = random.choice(PLAYERS)
     gameWon = False
     theBoard = getNewBoard()
+    # theBoard2 = getNewBoard2()
     for i in range(9):
 
         try:
-            # clearScreen()
-            # printBoard(theBoard)
             time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
             # print("Turn for " + turn + ". Move on which space?")
             # move = input()
             move = getRandomMove(theBoard)
+            # move2 = getRandomMove2(theBoard)
             move = str(move)
 
             colouredTurn = getColouredCharacter(turn)
@@ -231,15 +284,9 @@ def mainLoop(oWinNum, xWinNum):
             if gameWon:
                 if turn == "O":
                     oWinNum += 1
-                    print("O won " + str(oWinNum))
-                    print()
                 else:
                     xWinNum += 1
-                    print("X won " + str(xWinNum))
-                    print()
-                # print(turn + " won")
                 break
-            # if turn == "X":
             if "X" in turn:
                 turn = "O"
             else:
@@ -247,9 +294,46 @@ def mainLoop(oWinNum, xWinNum):
         except KeyboardInterrupt:
             print("Bye")
             sys.exit()
-    if not gameWon:
-        print("Game Drawn")
-        print()
+    # if not gameWon:
+    #     print("Game Drawn")
+    return [oWinNum, xWinNum]
+
+
+def mainLoop2(oWinNum, xWinNum):
+    turn = random.choice(PLAYERS)
+    gameWon = False
+    # theBoard = getNewBoard()
+    theBoard = getNewBoard2()
+    for i in range(GRID_WIDTH * GRID_WIDTH):
+
+        try:
+            time.sleep(SLEEP_PERIOD)  # Add a 1-second pause to reduce flickering.
+            # print("Turn for " + turn + ". Move on which space?")
+            # move = input()
+            move = getRandomMove2(theBoard)
+
+            colouredTurn = getColouredCharacter(turn)
+            # theBoard[move] = colouredTurn
+            theBoard[move[0]][move[1]] = colouredTurn
+            clearScreen()
+            printBoard2(theBoard)
+            # noughtsAndCrosses = dictToArray(theBoard)
+            gameWon = isGameWon(turn, theBoard)
+            if gameWon:
+                if turn == "O":
+                    oWinNum += 1
+                else:
+                    xWinNum += 1
+                break
+            if "X" in turn:
+                turn = "O"
+            else:
+                turn = "X"
+        except KeyboardInterrupt:
+            print("Bye")
+            sys.exit()
+    # if not gameWon:
+    #     print("Game Drawn")
     return [oWinNum, xWinNum]
 
 
@@ -282,12 +366,15 @@ def gameLoop():
     oWinNum = 0
     xWinNum = 0
     winStats = []
-    for i in range(5):
-        winStats = mainLoop(oWinNum, xWinNum)
+    for i in range(NUM_GAME_LOOPS):
+        winStats = mainLoop2(oWinNum, xWinNum)
         oWinNum = winStats[0]
         xWinNum = winStats[1]
         # testGame()
-    print(winStats)
+    oWins = winStats[0]
+    xWins = winStats[1]
+    print("O won " + str(oWins) + " times")
+    print("X won " + str(xWins) + " times")
 
 
 gameLoop()
