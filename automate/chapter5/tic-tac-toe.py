@@ -4,9 +4,6 @@ from re import M
 import sys
 import time
 
-rows, columns = os.popen("stty size", "r").read().split()
-TERM_WIDTH = int(columns)
-TERM_HEIGHT = int(rows)
 # The widht and height of the grid in cells
 WIDTH = 10
 HEIGHT = 10
@@ -14,6 +11,12 @@ SLEEP_PERIOD = 0.5
 NUM_GAME_LOOPS = 6
 PLAYERS = ("X", "Y")
 GRID_WIDTH = 3
+
+
+def getTerminalSize():
+    rows, columns = os.popen("stty size", "r").read().split()
+    termDict = {"termWidth": int(columns), "termHeight": int(rows)}
+    return termDict
 
 
 def getNewBoard():
@@ -32,24 +35,14 @@ def getNewBoard():
 
 
 def getNewBoard2():
-    # board = []
-    # Creates a list containing 5 lists, each of 8 items, all set to 0
     w, h = GRID_WIDTH, GRID_WIDTH
     Matrix = [[" " for x in range(w)] for y in range(h)]
-    # i = 0
-    # j = 0
-    # while i < 3:
-    #     while j < 3:
-    #         Matrix[i][j] = " "
-    #     j = 0
-    #     i += 1
     return Matrix
 
 
 player1 = "X"
 player2 = "O"
 cellWidth = WIDTH * len(player1)
-# print("cellwidth is " + str(cellWidth))
 
 colourDict = {
     "HEADER": "\033[95m",
@@ -73,18 +66,22 @@ def getColouredCharacter(char):
     return colourChar
 
 
-def getCenterStringX2():
+def getCenterStringX():
     # push the grid right
     widthSpacerString = ""
-    numSpacesX = (TERM_WIDTH // 2) - (cellWidth // 2)
+    termSizeDict = getTerminalSize()
+    termWidth = termSizeDict["termWidth"]
+    numSpacesX = (termWidth // 2) - (cellWidth // 2)
     for i in range(numSpacesX):
         # print(" ", end="")
         widthSpacerString += " "
     return widthSpacerString
 
 
-def getCenterStringY2():
-    numSpacesY = TERM_HEIGHT // 2 - HEIGHT // 2
+def getCenterStringY():
+    termSizeDict = getTerminalSize()
+    termHeight = termSizeDict["termHeight"]
+    numSpacesY = termHeight // 2 - HEIGHT // 2
     carrReturn = ""
     for x in range(numSpacesY):
         carrReturn += "\n"
@@ -94,12 +91,15 @@ def getCenterStringY2():
 def clearScreen():
     #     update terminal without flickering, as described at:
     #    https://stackoverflow.com/questions/69870429/how-can-i-update-clear-the-console-without-blinking-in-python
-    termHeightPlusOne = TERM_HEIGHT
+    termSizeDict = getTerminalSize()
+    termHeight = termSizeDict["termHeight"]
+    termHeightPlusOne = termHeight
     termHeightPlusOne = str(termHeightPlusOne)
     print("\033[" + termHeightPlusOne + "A\033[2K", end="")
     # os.system("cls" if os.name == "nt" else "clear")
 
 
+# Gets a random move using the original dictionary.
 def getRandomMove(theBoard):
     emptyList = []
     for k in theBoard.keys():
@@ -108,6 +108,11 @@ def getRandomMove(theBoard):
     return random.choice(emptyList)
 
 
+# Gets random move using a 2d array version of the board.
+# To get only the unfilled positions, build a list from the
+# 2d array. The new array values are the indices of the
+# 2d array in a tuple. Now get a random index as normal,
+# And return the tuple.
 def getRandomMove2(theBoard):
     i = 0
     j = 0
@@ -128,9 +133,10 @@ def getRandomMove2(theBoard):
     return arrayCopy[randIndex]
 
 
+# Prints the board where the board is a dictionary
 def printBoard(board):
-    center_x_string = getCenterStringX2()
-    print(getCenterStringY2())
+    center_x_string = getCenterStringX()
+    print(getCenterStringY())
     print(
         center_x_string + board["top-L"] + "|" + board["top-M"] + "|" + board["top-R"]
     )
@@ -144,9 +150,11 @@ def printBoard(board):
     )
 
 
+# Prints the 2d Array version of the board.
 def printBoard2(board):
-    center_x_string = getCenterStringX2()
-    print(getCenterStringY2())
+    center_x_string = getCenterStringX()
+    # push the grid down the terminal to the midway point.
+    print(getCenterStringY())
     i = 0
     j = 0
     while i < GRID_WIDTH:
@@ -157,12 +165,10 @@ def printBoard2(board):
             else:
                 print(board[i][j] + "|", end="")
             j += 1
-        # print(center_x_string, end="")
         print()
 
         if i != GRID_WIDTH - 1:
             print(center_x_string + "-+-+-")
-        # print("\n-+-+-")
         j = 0
         i += 1
 
@@ -179,6 +185,7 @@ def print2dArray(twoDArray):
         i += 1
 
 
+# Converts tic tac toe dictionary to 2d array. Assumes a 3*3 grid.
 def dictToArray(dict):
     noughtsAndCrosses = [
         [dict["top-L"], dict["top-M"], dict["top-R"]],
@@ -264,7 +271,6 @@ def mainLoop(oWinNum, xWinNum):
     turn = random.choice(PLAYERS)
     gameWon = False
     theBoard = getNewBoard()
-    # theBoard2 = getNewBoard2()
     for i in range(9):
 
         try:
@@ -299,10 +305,10 @@ def mainLoop(oWinNum, xWinNum):
     return [oWinNum, xWinNum]
 
 
+# This version uses a 2d array instead of a dictionary, which makes more sense.
 def mainLoop2(oWinNum, xWinNum):
     turn = random.choice(PLAYERS)
     gameWon = False
-    # theBoard = getNewBoard()
     theBoard = getNewBoard2()
     for i in range(GRID_WIDTH * GRID_WIDTH):
 
@@ -313,11 +319,9 @@ def mainLoop2(oWinNum, xWinNum):
             move = getRandomMove2(theBoard)
 
             colouredTurn = getColouredCharacter(turn)
-            # theBoard[move] = colouredTurn
             theBoard[move[0]][move[1]] = colouredTurn
             clearScreen()
             printBoard2(theBoard)
-            # noughtsAndCrosses = dictToArray(theBoard)
             gameWon = isGameWon(turn, theBoard)
             if gameWon:
                 if turn == "O":
