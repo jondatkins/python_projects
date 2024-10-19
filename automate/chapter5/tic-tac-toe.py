@@ -7,7 +7,7 @@ import time
 # The widht and height of the grid in cells
 # WIDTH = 10
 # HEIGHT = 10
-SLEEP_PERIOD = 1
+SLEEP_PERIOD = 0.1
 NUM_GAME_LOOPS = 1
 PLAYERS = ("X", "Y")
 GRID_SIZE = 4
@@ -81,8 +81,10 @@ def getCenterStringX():
 def getCenterStringY():
     termSizeDict = getTerminalSize()
     termHeight = termSizeDict["termHeight"]
-    numSpacesY = termHeight // 2 - GRID_SIZE // 2
-    # numSpacesY = 13
+    gridHeight = GRID_SIZE + GRID_SIZE - 1
+    # numSpacesY = termHeight // 2 - gridHeight // 2
+    # numSpacesY = termHeight // 2
+    numSpacesY = 8
     carrReturn = ""
     for x in range(numSpacesY):
         carrReturn += "\n"
@@ -94,7 +96,7 @@ def clearScreen():
     #    https://stackoverflow.com/questions/69870429/how-can-i-update-clear-the-console-without-blinking-in-python
     termSizeDict = getTerminalSize()
     termHeight = termSizeDict["termHeight"]
-    termHeightPlusOne = termHeight
+    termHeightPlusOne = termHeight + 1
     termHeightPlusOne = str(termHeightPlusOne)
     print("\033[" + termHeightPlusOne + "A\033[2K", end="")
     # os.system("cls" if os.name == "nt" else "clear")
@@ -301,7 +303,7 @@ def mainLoop(oWinNum, xWinNum):
 
             colouredTurn = getColouredCharacter(turn)
             theBoard[move] = colouredTurn
-            clearScreen()
+            # clearScreen()
             printBoard(theBoard)
             noughtsAndCrosses = dictToArray(theBoard)
             gameWon = isGameWon(turn, noughtsAndCrosses)
