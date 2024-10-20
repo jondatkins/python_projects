@@ -5,3 +5,4 @@ outputFiles
 .venv
 env
 venv
+!venv/pyvenv.cfg
