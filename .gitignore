@@ -4,5 +4,7 @@ inputFiles
 outputFiles
 .venv
 env
-venv
-!venv/pyvenv.cfg
+venv/bin
+venv/include
+venv/lib
+venv/lib64
