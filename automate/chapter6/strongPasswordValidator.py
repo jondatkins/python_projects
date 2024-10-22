@@ -2,18 +2,20 @@ import re
 
 # A strong password is defined as one that is at least eight characters long, contains
 # both uppercase and lowercase characters, and has at least one digit
-passwordRegExString = r"(0[1-9]|1[0-9]|2[0-9]|3[0-1])"
 lengthRegEx = re.compile(r"(.{8,})")
 uppercaseRegEx = re.compile(r"([A-Z])")
 lowercaseRegEx = re.compile(r"([a-z])")
 numbersRegEx = re.compile(r"([0-9])")
-passwordRegEx = re.compile(passwordRegExString)
+upperAndLowerRegEx = re.compile(r"(?=.*[a-z])(?=.*[A-Z]).*")
+
+
 # (.{8,})
 badPasword = "123"
 goodPassword = "iAmTheVeryModelOfAModernMajorGeneral2"
 allCaps = "I AM SHOUTING!!!!"
 lwrCase = "hello? is it me you're looking for?"
 numbers = "233111112345646454646645647979789"
+lowerAndUpper = "AAAsssaaaAAA"
 
 
 def checkPassword(regEx, password):
@@ -29,3 +31,4 @@ checkPassword(lengthRegEx, goodPassword)
 checkPassword(uppercaseRegEx, allCaps)
 checkPassword(lowercaseRegEx, lwrCase)
 checkPassword(numbersRegEx, numbers)
+checkPassword(upperAndLowerRegEx, lowerAndUpper)
