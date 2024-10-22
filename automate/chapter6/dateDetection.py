@@ -12,6 +12,19 @@ monthRegEx = re.compile(monthRegExString)
 yearRegEx = re.compile(yearRegExString)
 dayRegEx2 = re.compile(dayRegExString2)
 
+leapYears = [
+    1804,
+    1808,
+    1812,
+    1816,
+    1820,
+    1824,
+    1828,
+    1832,
+    1836,
+]
+normalYears = [1700, 1800, 1900, 2100]
+
 dateRegEx = re.compile(
     r"""(
     (0[1-9]|1[0-9]|2[0-9]|3[0-1]) # days 00 - 31
@@ -25,8 +38,9 @@ dateRegEx = re.compile(
 
 dates = ["01/09/2999", "2/09/2000", "31/99/2000", "11/11/999", "11/11/3001"]
 dates2 = ["01/09/2999", "12/09/2000", "31/09/2000"]
-badDates = ["31/04/2000"]
+badDates = ["31/04/2000", "31/02/2020", "31/04/2021"]
 # DD/MM/YYYY
+
 days = [
     "09",
     "9",
@@ -70,19 +84,26 @@ def validateDates(dateData):
             print("Month " + str(month) + " has too many days " + str(day))
             return False
     elif month == 2:
-        if year % 4 == 0:
-            if year % 100 == 0:
-                if year % 400 == 0:
-                    print("leap year")
-                print("not leap year")
-
-        if day > 28:
+        if isLeapYear(year) and day > 29:
+            return False
+        elif day > 28:
             print("Month " + str(month) + " has too many days " + str(day))
             return False
     else:
         if day > 31:
             print("Month " + str(month) + " has too many days " + str(day))
             return False
+
+
+def isLeapYear(y):
+    year = int(y)
+    if year % 4 == 0 and not year % 100 == 0 or year % 400 == 0:
+        # print("My name is {0} and I am {1} years old".format(name, age))
+        print("this year {0} is a leap year".format(year))
+        return False
+    else:
+        print("this year {0} is not a leap year".format(year))
+        return True
 
 
 # for d in days:
@@ -97,3 +118,9 @@ def validateDates(dateData):
 for d in badDates:
     dateData = checkDate(dateRegEx, d, "date")
     validateDates(dateData)
+
+# for ly in leapYears:
+#     isLeapYear(ly)
+
+# for y in normalYears:
+#     isLeapYear(y)
