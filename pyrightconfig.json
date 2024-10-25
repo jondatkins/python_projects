@@ -1,5 +1,6 @@
 {
   "extraPaths": [
-    "./venv/lib/python*/site-packages"
+    "./venv/lib/python3.12/site-packages",
+    "./venv/lib/python3.10/site-packages"
   ]
 }
