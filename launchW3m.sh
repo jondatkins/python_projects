@@ -1,2 +1,2 @@
 #!/bin/bash
-w3m https://automatetheboringstuff.com/2e/chapter7/
+w3m https://automatetheboringstuff.com/2e/chapter9/
