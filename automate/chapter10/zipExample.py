@@ -3,7 +3,7 @@ import zipfile, os
 from pathlib import Path
 
 p = Path.cwd()
-exampleZip = zipfile.ZipFile(p / "foo_1.zip")
+exampleZip = zipfile.ZipFile(p / "test.zip")
 print(exampleZip.namelist())
 # ['spam.txt', 'cats/', 'cats/catnames.txt', 'cats/zophie.jpg']
 spamInfo = exampleZip.getinfo("eggs.txt")
